@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🤖 Trading Bot Dashboard</title>
+    <style>
+        body { font-family: Arial; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .card { background: white; padding: 20px; margin: 10px 0; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .signal { background: #e8f5e8; border-left: 4px solid #28a745; }
+        .price { font-size: 24px; font-weight: bold; color: #007bff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Trading Bot Dashboard</h1>
+
+        <div class="card">
+            <h3>💰 Current Price</h3>
+            <div id="price" class="price">Loading...</div>
+            <button onclick="updatePrice()">Update Price</button>
+        </div>
+
+        <div class="card">
+            <h3>🧠 Strategy Analysis</h3>
+            <button onclick="analyzeMarket()">Analyze Market</button>
+            <div id="analysis"></div>
+        </div>
+
+        <div class="card">
+            <h3>📊 Active Signals</h3>
+            <button onclick="getSignals()">Get Signals</button>
+            <div id="signals"></div>
+        </div>
+    </div>
+
+    <script>
+        async function updatePrice() {
+            const response = await fetch('/market/price/BTCUSDT');
+            const data = await response.json();
+            document.getElementById('price').innerHTML = `$${data.price.toLocaleString()}`;
+        }
+
+        async function analyzeMarket() {
+            const response = await fetch('/strategy/analyze', {method: 'POST'});
+            const data = await response.json();
+
+            let html = '';
+            if (data.signal_generated) {
+                html = `<div class="signal">
+                    <h4>🎯 New Signal: ${data.signal.action.toUpperCase()}</h4>
+                    <p><strong>Reason:</strong> ${data.signal.reason}</p>
+                    <p><strong>Confidence:</strong> ${(data.signal.confidence * 100).toFixed(1)}%</p>
+                    <p><strong>Price:</strong> $${data.current_price.toLocaleString()}</p>
+                </div>`;
+            } else {
+                html = `<p>😴 ${data.message}</p><p>Current Price: $${data.current_price.toLocaleString()}</p>`;
+            }
+
+            document.getElementById('analysis').innerHTML = html;
+        }
+
+        async function getSignals() {
+            const response = await fetch('/signals/active');
+            const data = await response.json();
+
+            let html = `<p>Total signals: ${data.count}</p>`;
+            data.signals.forEach(signal => {
+                html += `<div class="signal">
+                    <strong>${signal.action.toUpperCase()}</strong> ${signal.symbol}
+                    (${(signal.confidence * 100).toFixed(1)}% confidence)
+                    <br><small>${signal.reason}</small>
+                </div>`;
+            });
+
+            document.getElementById('signals').innerHTML = html;
+        }
+
+        // Автообновление цены каждые 5 секунд
+        setInterval(updatePrice, 5000);
+        updatePrice();
+    </script>
+</body>
+</html>

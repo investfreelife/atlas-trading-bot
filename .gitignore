@@ -1,0 +1,32 @@
+# Виртуальная среда
+.venv/
+venv/
+env/
+
+# Python кэш
+__pycache__/
+*.pyc
+*.pyo
+
+# Конфиги с токенами
+config.py
+.env
+*.key
+token.txt
+secret.py
+
+# IDE
+.idea/
+.vscode/
+
+# Логи
+*.log
+logs/
+
+# Базы данных
+*.db
+*.sqlite
+
+# Временные файлы
+*.tmp
+*.temp
